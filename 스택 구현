@@ -1,0 +1,100 @@
+스택 
+1. LIFO(후입선출)방식으로 나중에 들어온 것이 먼저 나감.
+2. 파이썬에서는 simple array, dynamic array, linked list로 구현 가능
+3. 파이썬에서는 동적배열이 가능한 리스트가 스택의 역할을 함.
+4. 활용예로는 브라우저의 방문기록, 클립보드, 함수호출등이 있음
+
+스택의 기능 
+1. push
+2. pop # 최상단의 노드를 리턴하고 제거
+3. peek # 최상단의 노드를 리턴
+4. size
+5. Is_empty
+6. IsFullStack
+
+연결리스트로 구현
+class Node:
+    def __init__(self,data):
+        self.data = data
+        self.next = None
+
+    def __str__(self):
+        return str(self.data)
+
+class Stack:
+    def __init__(self):
+        self.top = None
+        self.size = 0
+
+    def __str__(self):
+        if self.is_empty():
+            return 'empty'
+        print_stack = f'--------\n 스택사이즈 : {self.size}\n'
+
+        node = self.top
+        while True:
+            print_stack += str(node)
+            node = node.next
+            if node==None:
+                break
+            print_stack += '\n'
+        return print_stack
+
+    def push(self, data):
+        new_node = Node(data)
+        new_node.next = self.top
+        self.top = new_node
+        self.size += 1
+
+    def pop(self):
+        if self.is_empty():
+            return 'empty'
+
+        del_node = self.top
+        data = del_node.data
+        self.top = self.top.next
+        del del_node
+        self.size -= 1
+        return data
+
+    def peek(self):
+        if self.is_empty():
+            return 'empty'
+        return str(self.top)
+
+    def is_empty(self):
+        if self.size == 0:
+            return True
+        else:
+            return False
+
+    def size(self):
+        print(f'현재 스택의 크기는 {self.size}입니다.')
+
+
+리스트로 구현
+class Stack:
+    def __init__(self, data):
+        self.stack = [data]
+
+    def pop(self):
+        return self.stack.pop()
+
+    def push(self,data):
+        self.stack.append(data)
+
+    def peek(self):
+        return self.stack[-1]
+
+    def size(self):
+        return len(self.stack)
+
+    def is_empty(self):
+        if not self.stack:
+            return 'empty'
+        else:
+            return 'no empty'
+    
+    def print_stack(self):
+        print(self.stack)
+

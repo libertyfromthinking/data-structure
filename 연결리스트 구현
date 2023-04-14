@@ -1,0 +1,359 @@
+LinkedList(연결리스트)
+1. 배열은 메모리에서 물리적으로 연속된 공간을 할당받기 때문에 중간에 값이 삭제되면 연속적인 자리교체가 있어야 되므로 오버헤드가 많이 발생함. 연결리스트는 하이퍼링크처럼 링크를 통해 다음 값을 알아내므로 중간값이 삭제되어도 오버헤드없이 링크만 바꿔주면 되므로 효율적임. 
+2. 파이썬에서는 리스트도 연결리스트로 구현되어 있음. c확장 라이브러리인 llist나 pyllist도 존재함. 사용빈도는 적은 듯.
+3. 배열과 달리 프로그램 도중에 size 변경 가능
+4. 배열보다 각 요소에 접근하는 시간이 더 걸림
+5. 마지막 원소가 제거되면 바로앞의 원소의 포인터를 None로 변경해야 함
+
+
+연결리스트의 메소드
+1. insert
+2. delete
+3. delete list(리스트의 모든 원소 제거)
+4. count
+5. find nth node from the end of the list
+
+연결리스트의 종류
+1. 단순 연결 리스트 : 일반적인 연결 리스트, 헤더 노드는 다음 노드를 가리키고 다음 노드는 그 다음 노드를 가리킴
+2. 원형 연결 리스트 : 단순 연결 리스트와 비슷하지만 테일 노드가 헤더 노드를 가리킴
+3. 이중 연결 리스트 : 헤더 노드만 존재하며 각 노드는 다음 노드와 이전 노드를 동시에 가리킴
+** 노드 - 값+링크(포인터)
+
+단순연결리스트 
+
+노드 생성자
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+다음 노드 참조
+head = Node(5)
+next_node = Node(12)
+haed.next = next_node
+
+노드 클래스
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+    def __str__(self):
+        return str(self.data)
+
+단순연결리스트 전체소스코드
+class SingleLinkedList:
+    def __init__(self, data):
+        new_node = Node(data)
+        self.head = new_node
+        self.list_size = 1
+
+    def __str__(self):
+        print_list = '[ '
+        node = self.head
+        while True:
+            print_list += str(node)
+
+            if node.next == None:
+                break
+            node = node.next
+            print_list += ', '
+        print_list += ' ]'
+        return print_list
+
+    def insertFirst(self, data):
+        new_node = Node(data)
+        temp_node = self.head
+        self.head = new_node
+        self.head.next = temp_node
+        self.list_size += 1
+
+	# num노드의 다음 인덱스에 새로운 노드 삽입
+    def insertMiddle(self, num, data):
+        if self.head.next == None:
+            insertLast(data)
+            return
+        node = self.selectNode(num)
+        new_node = Node(data)
+        temp_next = node.next
+        node.next = new_node
+        new_node.next = temp_next
+        self.list_size += 1
+    
+    def insertLast(self, data):
+        node = self.head
+        while True:
+            if node.next == None:
+                break
+            node = node.next
+        
+        new_node = Node(data)
+        node.next = new_node
+        self.list_size += 1
+
+    def selectNode(self, num):
+        if self.list_size < num:
+            print("Overflow")
+            return
+        node = self.head
+        count = 0
+        while count < num:
+            node = node.next
+            count += 1
+        return node
+
+    def deleteNode(self, num):
+        if self.list_size < 1:
+            return # Underflow
+        elif self.list_size < num:
+            return # Overflow
+
+        if num == 0:
+            self.deleteHead()
+            return
+        node = self.selectNode(num - 1)
+        node.next = node.next.next
+        del_node = node.next
+        del del_node
+
+    def deleteHead(self):
+        node = self.head
+        self.head = node.next
+        del node
+
+    def size(self):
+        return str(self.list_size)
+
+
+원형연결리스트 : 마지막에 삽입 시에 단순연결리스트는 끝까지 탐색 후 next -> None 이 발견되면 삽입하지만 원형연결리스트는 꼬리다음에 삽입하면 되므로 성능상 이점이 있음
+
+원형연결리스트 전체소스코드
+class CircleLinkedList:
+    def __init__(self, data):
+        new_node = Node(data)
+        self.head = new_node
+        self.tail = None
+        self.list_size = 1
+
+    def __str__(self):
+        print_list = '[ '
+        node = self.head
+        while True:
+            print_list += str(node)
+            if node == self.tail:
+            # 단순 연결 리스트와 달리
+            # 노드가 테일 노드면 끝난다
+                break
+            node = node.next
+            print_list += ', '
+        print_list += ' ]'
+        return print_list
+
+    def insertFirst(self, data):
+        new_node = Node(data)
+	new_node.next = self.head
+	self.head = new_node
+	if self.tail == None:
+	    self.tail = self.head.next
+	    self.tail.next = self.head
+	self.list_size += 1	
+
+    def insertMiddle(self, num, data):
+        node = self.selectNode(num)
+        new_node = Node(data)
+        temp_next = node.next
+        node.next = new_node
+        new_node.next = temp_next
+        self.list_size += 1
+    
+    def insertLast(self, data):
+        new_node = Node(data)
+        if self.tail == None:
+            self.tail = new_node
+            self.head.next = self.tail
+        else:
+            self.tail.next = new_node
+            self.tail = new_node
+        self.tail.next = self.head
+        self.list_size += 1
+
+    def selectNode(self, num):
+        if self.list_size < num:
+            print("Overflow")
+            return
+        node = self.head
+        count = 0
+        while count < num:
+            node = node.next
+            count += 1
+        return node
+
+    def deleteNode(self, num):
+        if self.list_size < 1:
+            return # Underflow
+        elif self.list_size < num:
+            return # Overflow
+
+        if num == 0:
+            self.deleteHead()
+            return
+        node = self.selectNode(num - 1)
+        node.next = node.next.next
+        del_node = node.next
+        del del_node
+
+    def deleteHead(self):
+        node = self.head
+        self.head = node.next
+        del node
+
+    def size(self):
+        return str(self.list_size)
+
+이중연결리스트 : 값을 찾을 때 위의 두 연결리스트는 순차적으로 찾지만 이중연결리스트는 뒤로도 이동이 가능하므로 성능의 이점이 있음, 대신 노드 클래스에 prev 속성 추가해야함
+
+이중연결리스트 노드 클래스 코드
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+    def __str__(self):
+        return str(self.data)
+
+class DaulLinkedList:
+    def __init__(self, data):
+        self.head = Node(data)
+        self.list_size = 1
+
+    def __str__(self):
+        print_list = '['
+        node = self.head
+        while True:
+            print_list += str(node)
+            if node.next == self.head:
+                break
+            node = node.next
+            print_list += ', '
+        print_list += ']'
+        return print_list
+
+    def insertFirst(self, data):
+        new_node = Node(data)
+        if self.head.next==None:
+            new_node.prev = self.head
+            self.head.next = new_node
+        else:
+            new_node.prev = self.head.prev
+            new_node.prev.next = new_node
+        new_node.next = self.head
+        self.head.prev = new_node
+        self.head = new_node
+        self.list_size += 1
+
+    def selectNode(self, num):
+        if num>=self.list_size:
+            return 'overflow'
+        elif num<0:
+            return 'underflow'
+        elif num==0:
+            return self.head
+
+        size = self.list_size/2
+        if num<size:
+            node=self.head
+            count=0
+        else:
+            node=self.head.prev
+            count=self.list_size-1
+
+        while True:
+            if count==num:
+                break
+            if num<size:
+                node = node.next
+                count += 1
+            else:
+                node = node.prev
+                count -= 1
+        return node
+
+    def insertMiddleAfter(self, data, num):
+        if num>self.list_size-1:
+            return 'overflow'
+        elif num<0:
+            return 'underflow'
+
+        if num==0:
+            self.insertFirst(data)
+            return
+        elif num==self.list_size-1:
+            self.insertLast(data)
+            return
+
+        new_node = Node(data)
+        node = self.selectNode(num)
+        new_node.next = node.next
+        new_node.prev = node
+        new_node.next.prev = new_node
+        node.next = new_node
+        self.list_size += 1    
+    def insertMiddleBefore(self, data, num):
+        if num>=self.list_size-1:
+            return 'overflow'
+        elif num<0:
+            return 'underflow'
+
+        if num==0:
+            self.insertFirst(data)
+            return
+        elif num==self.list_size-1:
+            self.insertLast(data)
+            return
+
+        new_node = Node(data)
+        node = self.selectNode(num)
+        new_node.prev = node.prev
+        new_node.next = node
+        node.prev.next = new_node
+        node.prev = new_node
+        self.list_size += 1
+
+    def insertLast(self,data):
+        new_node = Node(data)
+        node = self.head.prev
+        self.head.prev = new_node
+        new_node.next = self.head
+        new_node.prev = node
+        node.next = new_node
+        self.list_size += 1
+
+    def deleteHead(self):
+        node = self.head
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        self.head = node.next
+        del node
+        self.list_size -= 1
+
+    def deleteNode(self, num):
+        if num==0:
+            self.deleteHead()
+            return
+        elif num>self.list_size-1:
+            return 'overflow'
+        elif num<0:
+            return 'underflow'
+
+        node = self.selectNode(num)
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        del node
+        self.list_size -= 1
+
+    def size(self):
+        return str(self.list_size)
+
+
+

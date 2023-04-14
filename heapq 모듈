@@ -1,0 +1,6 @@
+import heapq ## from heapq import * 로도 사용가능
+
+h = list() ## 따로 힙자료형이 있는 것이 아니라 리스트를 힙구조로 만들어서 사용
+heapq.heappush(h, 1) ## 힙구조에 1삽입
+heapq.heappop() ## 루트값(인덱스0) pop
+heapq.heapify(h) ## 이미 생성되어있는 리스트 heap구조로 만드릭

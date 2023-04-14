@@ -1,0 +1,176 @@
+힙(Heap)
+1. 최대값, 최소값 찾기 연산을 쉽게 하기위해 고안된 완전이진트리를 기반으로 한 자료구조
+2. 완전이진트리(complete binary tree)일 것
+3. 부모노드와 자식노드 키값의 대소관계 성립, 형제관계에는 대소관계 없음	
+4. 각 노드는 인덱스와 키값으로 이루어짐.
+5. 각 노드의 값이 그 자식보다 작지 않은 최대힙, 자식보다 크지 않은 최소힙으로 나뉨.
+6. 힙은 배열로 나타낼 수 있음. 위에서 아래로 좌에서 우로 나타내는데 이 때 인덱스 k의 자식 인덱스는 2k+1, 2k+2이고 자식 j의 부모 인덱스는 j-1//2(소수점버림)
+7. 힙정렬(heapify)은 위에서 아래로 진행, 삽입 시 최대힙 기준으로 끝에 삽입 후 부모보다 더 작을 때 까지 교환 진행, 초기 힙정렬(heapsort)은 힙길이//2-1(마지막 노드의 부모)에서 0번째 노드까지 진행
+8. 높이 h인 포화이진트리의 최대노드개수는 2^h-1
+9. 값 삭제 시에는 루트노드를 삭제함(최댓값, 최소값을 찾기위한 자료형이므로 루트값만 삭제함). 그리고 가장 마지막값을 루트로 옮기고 정렬실행
+
+이진트리의 종류
+1. 포화이진트리 : 높이가 h인 트리에서 있을 수 있는 최대 노드수를 가진 트리
+2. 완전이진트리 : 위에서 아래로, 왼쪽에서 오른쪽으로 채워지는 트리
+3. 힙
+4. 균형트리 : 좌우 대칭
+5. 이진탐색트리
+
+힙정렬 절차
+1. 배열길이//2 에서 0까지(인덱스는 1부터) heapify 반복해서 최대힙(또는 최소힙) 구성
+2. 말단 노드와 루트 노드 위치 변경
+3. 새로운 말단노트 제외하고 다시 heapify 최대힙 구성
+4. 2,3 반복
+
+힙 구현 소스(최대힙)
+class Heap:
+    def __init__(self, *data):
+        self.h = list(data)
+
+    def __str__(self):
+        return str(self.h)
+    
+    # 자식노드가 자신보다 크면 위치변경 후 자식노드에서 다시 heapify
+    def heapify(self, idx):
+        if idx<0:
+            return
+        max_idx = idx
+        left_idx = idx*2+1
+        right_idx = idx*2+2
+        if left_idx<len(self.h) and self.h[left_idx]>self.h[max_idx]:
+            max_idx = left_idx
+        if right_idx<len(self.h) and self.h[right_idx]>self.h[max_idx]:
+            max_idx = right_idx
+        if not max_idx==idx:
+            self.h[idx], self.h[max_idx] = self.h[max_idx], self.h[idx]
+            self.heapify(max_idx)
+    # 마지막 인덱스부터 인덱스 0 까지 올라오면서 heapify
+    def heap_sort(self):
+        print('정렬전 : ', self.h)
+        for i in range(len(self.h)//2-1, -1, -1):
+            self.heapify(i)
+        print('최대힙정렬후 : ',self.h)
+        heap_len = len(self.h)
+        sorted_heap = []
+        while self.h:
+            self.h[-1], self.h[0] = self.h[0], self.h[-1]
+            sorted_heap.insert(0,self.h.pop())
+            self.heapify(0)
+        self.h = sorted_heap
+
+        print('정렬완료 : ', self.h)
+    # 힙의 끝에 삽입 후 부모와 크기 비교해가며 부모보다 작을 때 까지 계속 교환
+    def insert(self, *data):
+        for i in data:
+            self.h.append(i)
+            last_idx = len(self.h)-1
+            while self.h[(last_idx-1)//2]>=0 and self.h[last_idx]>self.h[(last_idx-1)//2]:
+                self.h[(last_idx-1)//2], self.h[last_idx] = self.h[last_idx], self.h[(last_idx-1)//2]
+                last_idx = last_idx//2-1
+
+    def delete(self):
+        if len(self.h)==0:
+            return
+        self.h[0], self.h[-1] = self.h[-1], self.h[0]
+        del_value = self.h.pop()
+        self.heapify(0)
+        return del_value
+
+
+
+인터넷에서 가져온 힙구현 소스
+# 주어진 리스트를 최대힙정렬하는 메소드
+def heapify(unsorted, index, heap_size):
+    largest = index
+    left_index = 2 * index + 1
+    right_index = 2 * index + 2
+    if left_index < heap_size and unsorted[left_index] > unsorted[largest]:
+        largest = left_index
+    if right_index < heap_size and unsorted[right_index] > unsorted[largest]:
+        largest = right_index
+    if largest != index:
+        unsorted[largest], unsorted[index] = unsorted[index], unsorted[largest]
+        heapify(unsorted, largest, heap_size)
+
+# heapify 메소드를 인덱스 리스트사이즈//2에서 0까지 반복
+def heap_sort(unsorted):
+    n = len(unsorted)
+    # BUILD-MAX-HEAP (A) : 위의 1단계
+    # 인덱스 : (n을 2로 나눈 몫-1)~0
+    # 최초 힙 구성시 배열의 중간부터 시작하면 
+    # 이진트리 성질에 의해 모든 요소값을 
+    # 서로 한번씩 비교할 수 있게 됨 : O(n)
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(unsorted, i, n)
+    # Recurrent (B) : 2~4단계
+    # 한번 힙이 구성되면 개별 노드는
+    # 최악의 경우에도 트리의 높이(logn)
+    # 만큼의 자리 이동을 하게 됨
+    # 이런 노드들이 n개 있으므로 : O(nlogn)
+    for i in range(n - 1, 0, -1):
+        unsorted[0], unsorted[i] = unsorted[i], unsorted[0]
+        heapify(unsorted, 0, i)
+    return unsorted
+
+class Heap:
+    def __init__(self):
+        self.h = []
+        self.currsize = 0
+ 
+    def leftChild(self,i):
+        if 2*i+1 < self.currsize:
+            return 2*i+1
+        return None
+ 
+    def rightChild(self,i):
+        if 2*i+2 < self.currsize:
+            return 2*i+2
+        return None
+ 
+    def maxHeapify(self,node):
+        if node < self.currsize:
+            m = node
+            lc = self.leftChild(node)
+            rc = self.rightChild(node)
+            if lc is not None and self.h[lc] > self.h[m]:
+                m = lc
+            if rc is not None and self.h[rc] > self.h[m]:
+                m = rc
+            if m!=node:
+		self.h[node], self.h[m] = self.h[m], self.h[node]
+                self.maxHeapify(m)
+ 
+    def buildHeap(self,a):
+        self.currsize = len(a)
+        self.h = list(a)
+        for i in range(self.currsize//2,-1,-1):
+            self.maxHeapify(i)
+ 
+    def getMax(self):
+        if self.currsize >= 1:
+            me = self.h[0]
+            self.h[0], self.h[self.currsize-1] = self.h[self.currsize-1], self.h[0]
+            self.currsize -= 1
+            self.maxHeapify(0)
+            return me
+        return None
+ 
+    def heapSort(self):
+        size = self.currsize
+        while self.currsize-1 >= 0:
+            self.h[0], self.h[self.currsize-1] = self.h[self.currsize-1], self.h[0]
+            self.currsize -= 1
+            self.maxHeapify(0)
+        self.currsize = size
+ 
+    def insert(self,data):
+        self.h.append(data)
+        curr = self.currsize
+        self.currsize+=1
+        while (curr-1)//2 >= 0 and self.h[curr] > self.h[(curr-1)//2]:
+            self.h[(curr-1)//2], self.h[curr] = self.h[curr], self.h[(curr-1)//2]
+            curr = (curr-1)//2
+ 
+    def display(self):
+        print(self.h)
+

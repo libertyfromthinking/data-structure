@@ -1,0 +1,184 @@
+Queue(큐)
+1. 원소의 추가를 뒤(rear)에서, 삭제를 앞(front)에서 진행하는 FIFO(선입선출)방식의 자료구조. 
+2. 구현시 Simple Array를 사용하지 않는데 이는 Simple array는 rear(입구)와 front(출구)가 고정되어 있기 때문, 입출력시 계속 rear와 front같은 포인터나 요소를 이동해야 함.
+3. 파이썬에서는 Queue라이브러리에서 제공중, Queue(일반적인 큐), LifoQueue(후입선출방식), PriorityQueue(우선순위에 따라 데이터출력)으로 나뉨
+
+큐의 기능
+1. Enqueue(추가)
+2. Dequeue(삭제)
+3. peek
+4. is_empty
+5. is_full
+6. next_idx(다음인덱스)
+
+큐를 구현하는 방식(Simple Array 사용X, rear, front 포인터 이동이 불가능하기 때문)
+1. Circular array -> 원형큐
+2. Dynamic array -> 연결큐
+3. Linked List -> 연결큐
+
+큐의 종류
+1. 선형 큐 : 데이터가 꽉 차면 사이즈를 늘려야 한다는 점, 데이터가 없어도 메모리를 낭비하므로 효율성이 떨어진다는 점에서 잘 사용하지 않음.
+2. 원형 큐 : 선형 큐의 한계점을 해결하기 위해 만듬, 데이터를 추가할 때 (rear인덱스+1)%큐사이즈==front인덱스 조건이 만족되면 추가 안됨, rear와 front는 같은 인덱스에서 시작하며 +1씩 더해가며 삭제 또는 추가함. 한칸은 늘 비워놓음, 4크기의 큐는 3개의 데이터가 들어감.
+ex)rear(쓰기) 인덱스 : 7	front(읽기) 인덱스 : 0	상태에서는 요소 삭제없이 더 이상 추가되지 않음, 삭제 구현하면 인덱스1 의 요소삭제 후 front+1, 추가할때도 인덱스 8에 데이터 삽입 후 rear+1됨
+3. 연결 큐 : 연결리스트처럼 첫번째요소가 값과 포인터로 이루어져있음. 포인터는 다음 요소를 가리킴. 고로 크기제한이 없음.
+
+Linked List로 구현한 연결 큐 전체소스코드
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.link = None
+
+    def __str__(self):
+        return str(self.data)
+
+class Queue:
+    def __init__(self):
+        self.rear = None
+        self.front = None
+        self.size = 0
+
+    def __str__(self):
+        if self.is_empty():
+            return 'empty'
+        print_queue = '<== ['
+        node = self.front
+        while True:
+            print_queue += str(node)
+            if node==self.rear:
+                break
+            print_queue += ', '
+            node = node.link
+        print_queue += '] <=='
+        return print_queue
+
+    def is_empty(self):
+        if self.size == 0:
+            return True
+        else:
+            return False
+
+    def enQueue(self,data):
+        new_node = Node(data)
+        if self.is_empty():
+            self.front = new_node
+            self.front.link = new_node
+        else:
+            self.rear.link = new_node
+        self.rear = new_node
+        self.size += 1
+
+    def deQueue(self):
+        if self.is_empty():
+            return 'empty'
+        node = self.front
+        data = self.front.data
+        self.front = self.front.link
+        del node
+        self.size -= 1
+        return data
+
+    def peek(self):
+        return self.front.data
+       
+리스트로 구현한 연결큐 구현코드
+class ListQueue(object):
+    def __init__(self):
+        self.queue = []
+	self.front = self.queue[-1]
+	self.rear = self.queue[0]
+
+    def dequeue(self):
+        if len(self.queue) == 0:
+            return -1
+        return self.queue.pop()
+
+    def enqueue(self, n): 
+        self.queue.insert(0, n)
+        pass
+
+    def printq(self):
+        print(self.queue)
+
+리스트로 원형큐 구현하기
+class CircularQueue:
+    def __init__(self, length):
+        self.queue = [None]*length
+        self.rear = self.front = 0
+        self.length = length
+
+    def __str__(self):
+        if self.is_empty():
+            return 'Queue is empty'
+
+        print_queue = '<= ['
+        idx = self.front
+        while True:
+            print_queue += str(self.queue[idx])
+            idx += 1
+            if self.queue[idx] == None:
+                break
+            print_queue += ', '
+        print_queue += '] <='
+        return print_queue
+
+    def enqueue(self, data):
+        if self.is_full():
+            return 'Queue is full'
+
+        self.queue[self.rear] = data
+        self.rear = self.next_idx(self.rear)
+
+    def deque(self):
+        if self.is_empty():
+            return 'Queue is empty'
+
+        self.queue[self.front] = None
+        self.front = self.next_idx(self.front)
+
+    def next_idx(self, idx):
+        return (idx+1)%self.length
+
+    def is_full(self):
+        if self.front == (self.rear+1)%self.length:
+            return True
+        else:
+            return False
+
+    def is_empty(self):
+        if self.rear==self.front:
+            return True
+        else:
+            return False
+
+
+
+collections.deque로 연결큐 사용하기
+from collections import deque
+
+dq = deque([])
+
+dq.append(1)
+dq.append(2)
+dq.append(3)
+print(dq) # deque([1,2,3])
+
+print(dq.popleft()) #1
+print(dq.popleft()) #2
+print(dq.popleft()) #3
+print(dq) #deque([])
+
+Queue 모듈로 연결큐, LIFO큐, 우선순위큐 사용하기
+import queue
+q = queue.Queue([maxsize]) # 연결큐
+lq = queue.LifoQueue([maxsize]) # LIFO큐
+pq = queue.PriorityQueue([maxsize]) # 우선순위큐, put메소드 사용 시 (우선순위, 값) 튜플형태로 넘겨줌, 숫자가 적을수록 먼저 out됨
+
+공통 메소드
+qsize() : 큐 내부의 객체 개수 반환
+put(item) : 큐의 첫번째 인덱스에 객체 삽입
+put_nowait(item) : 내부가 꽉 찼을 경우 기다리지 않고 예외 발생시킴
+get() : 큐 내부의 마지막 객체 하나 반환
+get_nowait() : 내부가 비었을 경우 기다리지 않고 예외 발생시킴
+empty() : 내부가 비었는지 여부를 bool 자료형으로 반환
+full() : empty 메소드의 반대
+__init__() : 초기화
